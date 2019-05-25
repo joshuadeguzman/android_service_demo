@@ -25,7 +25,7 @@ enum class ServiceAction {
     }
 }
 
-class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+class MediaPlayerService : Service(), IMediaPlayerService, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
 
     private var TAG = MediaPlayerService::class.java.simpleName
     private var mMediaPlayer: MediaPlayer? = null
@@ -47,7 +47,7 @@ class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener, MediaPlaye
 
         // Subscribe to actions
         if (ServiceAction.STOP_SERVICE.toString() == intent.action) {
-            this.stopForegroundService()
+            this.stopMediaService()
         }
 
         // Setup
@@ -121,15 +121,15 @@ class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener, MediaPlaye
 
     override fun onCompletion(mp: MediaPlayer?) {
         Log.d(TAG, "Completed...")
-        this.stopForegroundService()
+        this.stopMediaService()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        this.stopForegroundService()
+        this.stopMediaService()
     }
 
-    private fun stopForegroundService() {
+    override fun stopMediaService() {
         Log.d(TAG, "Service stopped...")
         mMediaPlayer?.let {
             if (it.isPlaying) {
