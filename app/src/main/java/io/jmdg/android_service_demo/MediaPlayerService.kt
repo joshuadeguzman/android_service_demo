@@ -39,11 +39,11 @@ class MediaPlayerService : Service(), IMediaPlayerService, MediaPlayer.OnPrepare
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "On Create...")
+        Log.d(TAG, "OnCreate()")
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        Log.d(TAG, "On Start Command...")
+        Log.d(TAG, "OnStartCommand()")
 
         // Subscribe to actions
         if (ServiceAction.STOP_SERVICE.toString() == intent.action) {
@@ -103,22 +103,23 @@ class MediaPlayerService : Service(), IMediaPlayerService, MediaPlayer.OnPrepare
     }
 
     override fun onPrepared(mp: MediaPlayer?) {
-        Log.d(TAG, "Prepared...")
+        Log.d(TAG, "OnPrepared()")
         mp?.start()
     }
 
     override fun onCompletion(mp: MediaPlayer?) {
-        Log.d(TAG, "Completed...")
+        Log.d(TAG, "OnCompletion()")
         this.stopMediaService()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d(TAG, "OnDestroy()")
         this.stopMediaService()
     }
 
     override fun stopMediaService() {
-        Log.d(TAG, "Service stopped...")
+        Log.d(TAG, "stopMediaService()")
         mMediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()
