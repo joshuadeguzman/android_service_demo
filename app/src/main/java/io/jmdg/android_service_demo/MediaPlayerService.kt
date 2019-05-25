@@ -30,8 +30,8 @@ class MediaPlayerService : Service(), IMediaPlayerService, MediaPlayer.OnPrepare
     private var TAG = MediaPlayerService::class.java.simpleName
     private var mMediaPlayer: MediaPlayer? = null
 
-    val CHANNEL_ID = "FOREGROUND_CHANNEL_ID_ENERGYFM"
-    val CHANNEL_NAME = "FOREGROUND_CHANNEL_NAME_ENERGYFM"
+    val CHANNEL_ID = "SAMPLE_CHANNEL_ID"
+    val CHANNEL_NAME = "SAMPLE_CHANNEL_NAME"
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
