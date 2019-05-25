@@ -25,6 +25,11 @@
             android:name=".MediaPlayerService"
             android:enabled="true"
             android:exported="true" />
+
+        <service
+            android:name=".BoundMediaPlayerService"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
 </manifest>
