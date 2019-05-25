@@ -81,30 +81,18 @@ class MediaPlayerService : Service(), IMediaPlayerService, MediaPlayer.OnPrepare
             val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(channel)
-
-            notification = NotificationCompat
-                    .Builder(this, CHANNEL_ID)
-                    .setOngoing(true)
-                    .setContentTitle("Android Service Demo Android O and Above")
-                    .setContentText("This is a test")
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentIntent(pendingIntent)
-                    .addAction(android.R.drawable.ic_media_play, "Listen", pendingIntent)
-                    .addAction(android.R.drawable.ic_media_pause, "Stop", stopServicePendingIntent)
-                    .build()
-        } else {
-            // Build notification
-            notification = NotificationCompat
-                    .Builder(this, CHANNEL_ID)
-                    .setOngoing(true)
-                    .setContentTitle("Android Service Demo Android O Below")
-                    .setContentText("This is a test")
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentIntent(pendingIntent)
-                    .addAction(android.R.drawable.ic_media_play, "Listen", pendingIntent)
-                    .addAction(android.R.drawable.ic_media_pause, "Stop", stopServicePendingIntent)
-                    .build()
         }
+
+        notification = NotificationCompat
+                .Builder(this, CHANNEL_ID)
+                .setOngoing(true)
+                .setContentTitle("Android Service Demo Android O and Above")
+                .setContentText("This is a test")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .addAction(android.R.drawable.ic_media_play, "Listen", pendingIntent)
+                .addAction(android.R.drawable.ic_media_pause, "Stop", stopServicePendingIntent)
+                .build()
 
         // Start service
         startForeground(1, notification)
