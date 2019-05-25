@@ -1,7 +1,6 @@
 package io.jmdg.android_service_demo
 
 import android.app.*
-import android.app.Notification.PRIORITY_MIN
 import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
@@ -9,18 +8,22 @@ import android.os.IBinder
 import android.util.Log
 import android.os.Build
 import android.support.v4.app.NotificationCompat
-import android.content.Context.NOTIFICATION_SERVICE
-import android.support.v4.content.ContextCompat.getSystemService
-import android.app.NotificationManager
-import android.app.NotificationChannel
-import android.content.Context
-
 
 //
 // Created by Joshua de Guzman on 25/05/2019.
 // https://github.com/joshuadeguzman
 // https://jmdg.io
 //
+
+
+enum class ServiceAction {
+    START_SERVICE,
+    STOP_SERVICE;
+
+    override fun toString(): String {
+        return super.toString().toLowerCase()
+    }
+}
 
 class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
 
@@ -37,22 +40,37 @@ class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener, MediaPlaye
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "On Create...")
+    }
+
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        Log.d(TAG, "On Start Command...")
+
+        // Subscribe to actions
+        if (ServiceAction.STOP_SERVICE.toString() == intent.action) {
+            this.stopForegroundService()
+        }
+
+        // Setup
+        val rootIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, System.currentTimeMillis().toInt(), rootIntent, 0)
+
+        val stopSelfIntent = Intent(this, MediaPlayerService::class.java)
+        stopSelfIntent.action = ServiceAction.STOP_SERVICE.toString()
+        val stopServicePendingIntent = PendingIntent.getService(this, 0, stopSelfIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+
+        // Prepare media player
         val uri = Uri.parse("android.resource://$packageName/raw/sample")
         mMediaPlayer = MediaPlayer().apply {
             setDataSource(applicationContext, uri)
             setOnPreparedListener(this@MediaPlayerService)
             setOnCompletionListener(this@MediaPlayerService)
         }
-    }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        Log.d(TAG, "On Start Command...")
-
-        val rootIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, System.currentTimeMillis().toInt(), rootIntent, 0)
-
-        // Prepare media player
-        mMediaPlayer?.prepareAsync()
+        mMediaPlayer?.let {
+            if (!it.isPlaying) {
+                it.prepareAsync()
+            }
+        }
 
         // Setup notification
         var notification: Notification? = null
@@ -66,19 +84,25 @@ class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener, MediaPlaye
 
             notification = NotificationCompat
                     .Builder(this, CHANNEL_ID)
-                    .setContentTitle("Android Service Demo")
+                    .setOngoing(true)
+                    .setContentTitle("Android Service Demo Android O and Above")
                     .setContentText("This is a test")
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentIntent(pendingIntent)
+                    .addAction(android.R.drawable.ic_media_play, "Listen", pendingIntent)
+                    .addAction(android.R.drawable.ic_media_pause, "Stop", stopServicePendingIntent)
                     .build()
         } else {
             // Build notification
             notification = NotificationCompat
-                    .Builder(this)
-                    .setContentTitle("Android Service Demo")
+                    .Builder(this, CHANNEL_ID)
+                    .setOngoing(true)
+                    .setContentTitle("Android Service Demo Android O Below")
                     .setContentText("This is a test")
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentIntent(pendingIntent)
+                    .addAction(android.R.drawable.ic_media_play, "Listen", pendingIntent)
+                    .addAction(android.R.drawable.ic_media_pause, "Stop", stopServicePendingIntent)
                     .build()
         }
 
@@ -97,13 +121,24 @@ class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener, MediaPlaye
 
     override fun onCompletion(mp: MediaPlayer?) {
         Log.d(TAG, "Completed...")
-        mp?.let {
+        this.stopForegroundService()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        this.stopForegroundService()
+    }
+
+    private fun stopForegroundService() {
+        Log.d(TAG, "Service stopped...")
+        mMediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()
             }
 
             it.release()
         }
+        stopForeground(true)
         stopSelf()
     }
 }

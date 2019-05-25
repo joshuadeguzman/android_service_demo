@@ -6,14 +6,11 @@ import android.net.Uri
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
     private var TAG = MainActivity::class.java.simpleName
-    private var mediaPlayerServiceIntent : Intent? = null
-    private var isPlaying: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,15 +22,11 @@ class MainActivity : AppCompatActivity() {
 
         // Subscribe to button clicks
         btPlay.setOnClickListener {
-            // Must keep reference with the service
-            if (isPlaying) {
-                stopMediaSourceFromService()
-            } else {
-                playMediaSourceFromService()
-            }
+            playMediaSourceFromService()
+        }
 
-            this.isPlaying = !isPlaying
-            Log.d(TAG, isPlaying.toString())
+        btStop.setOnClickListener {
+            stopMediaSourceFromService()
         }
     }
 
@@ -52,18 +45,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun playMediaSourceFromService() {
-        mediaPlayerServiceIntent = Intent(this, MediaPlayerService::class.java)
+        val mediaIntent = Intent(this, MediaPlayerService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(mediaPlayerServiceIntent)
+            startForegroundService(mediaIntent)
         } else {
-            startService(mediaPlayerServiceIntent)
+            startService(intent)
         }
     }
 
     private fun stopMediaSourceFromService() {
-        mediaPlayerServiceIntent?.let {
-            stopService(it)
-        }
+        val mediaIntent = Intent(this, MediaPlayerService::class.java)
+        stopService(mediaIntent)
     }
 
     override fun onDestroy() {
